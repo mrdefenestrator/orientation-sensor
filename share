@@ -1,0 +1,67 @@
+	int i;
+	int rcv;
+	u08 rcv_str[5];
+	u32 fsize;
+	
+	// Open files, calculate filesizes, and get everything ready to transmit
+	
+	// Tell the catcher we're Ready To Throw
+	// CAN PROBABLY TURN THIS INTO A LOOP
+	ftSendByte('R');
+	ftSendByte('T');
+	ftSendByte('T');
+	
+	strcmp();
+	
+	// Wait for the catcher's response that he's Ready To Catch
+	i = 0;
+	while(i < 3) {	// Get 3 bytes from the catcher
+		if(!(rcv = ftGetByte())) {
+			rcv_str[i] = (u08)rcv;
+			i++;
+		}
+	}
+	// SHOULD PROBABLY USE A STRCMP() HERE
+	if(!(rcv_str[0] == 'R' && rcv_str[1] == 'T' && rcv_str[2] == 'C')) {
+		return -1;	// Wrong response, so give up
+	}
+
+	// Tell the catcher how many bytes we're going to throw
+	// Send this data MSB first
+	for(i = 3; i >= 0; i--) {
+		ftSendByte((u08)(fsize >> i*8));
+	}
+	
+	// Wait for the catcher to tell us to GO
+	i = 0;
+	while(i < 2) {	// Get 2 bytes from the catcher
+		if(!(rcv = ftGetByte())) {
+			rcv_str[i] = (u08)rcv;
+			i++;
+		}
+	}
+	// SHOULD PROBABLY USE A STRCMP() HERE
+	if(!(rcv_str[0] == 'G' && rcv_str[1] == 'O')) {
+		return -1;	// Wrong response, so give up
+	}
+	
+	// Throw the data at the catcher byte by byte
+//	for() {
+//		
+//	}
+	
+	// Wait for the catcher to tell us that he GOTIT
+	i = 0;
+	while(i < 5) {	// Get 5 bytes from the catcher
+		if(!(rcv = ftGetByte())) {
+			rcv_str[i] = (u08)rcv;
+			i++;
+		}
+	}
+	// SHOULD PROBABLY USE A STRCMP() HERE
+	if(!(rcv_str[0] == 'G' && rcv_str[1] == 'O' && rcv_str[2] == 'T' && rcv_str[3] == 'I' && rcv_str[4] == 'T')) {
+		return -1;	// Wrong response, so give up
+	}
+	
+	// If we got here, everything went according to plan.  Hooray!
+	return 0;
